@@ -102,47 +102,11 @@ private fun ChatScreenUi(
             LazyColumn(
                 modifier = Modifier
                     .weight(1f)
-                    .fillMaxSize(),
-                reverseLayout = true
+                    .fillMaxSize()
             ) {
                 items(messageList!!.toMutableList()) { message ->
                     MessageBubble(message = message, isSender = isSender)
                 }
-                /*              val groupByTimestampHistoryList = chatState.data.groupBy { it.formattedDate }
-
-                              groupByTimestampHistoryList.forEach { (date, messages) ->
-                                  items(messages) { message ->
-                                      val isSender = message.sender == loggedInUser?.email
-                                      Box(
-                                          modifier = Modifier.fillMaxWidth(),
-                                          contentAlignment = if (isSender)
-                                              Alignment.CenterEnd
-                                          else
-                                              Alignment.CenterStart
-                                      ) {
-                                          MessageBubble(
-                                              message = message,
-                                              isSender = isSender,
-                                              loggedInUser?.avatar.orEmpty(),
-                                              friendAvatar
-                                          )
-                                      }
-                                  }
-                                  stickyHeader {
-                                      Box(
-                                          modifier = Modifier
-                                              .fillMaxWidth()
-                                              .padding(20.dp),
-                                          contentAlignment = Alignment.Center
-                                      ) {
-                                          Text(
-                                              text = date.orEmpty(),
-                                              style = MaterialTheme.typography.bodySmall
-                                                  .copy(color = MaterialTheme.colorScheme.onBackground)
-                                          )
-                                      }
-                                  }
-                              }*/
             }
 
             OutlinedCard(
@@ -191,13 +155,7 @@ private fun ChatScreenUi(
                             contentDescription = "Send message",
                             tint = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.3f)
                         )
-                    },
-                    keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
-                    keyboardActions = KeyboardActions(
-                        onDone = {
-                            sendMessage()
-                        }
-                    )
+                    }
                 )
             }
 

@@ -62,28 +62,6 @@ fun MessageBubble(
     }
 }
 
-@Composable
-fun AvatarHead() {
-
-    Column(
-        modifier = Modifier
-            .padding(start = 8.dp, end = 8.dp, bottom = 8.dp),
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Spacer(modifier = Modifier.height(5.dp))
-        Image(
-            modifier = Modifier
-                .size(35.dp)
-                .clip(RoundedCornerShape(50.dp))
-                .background(color = MaterialTheme.colorScheme.onBackground)
-                .align(alignment = Alignment.CenterHorizontally),
-            painter = painterResource(id = R.drawable.baseline_person_24),
-            contentDescription = "Friend avatar"
-        )
-    }
-}
-
 @Preview
 @Composable
 fun MessageBubblePreview() {

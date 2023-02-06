@@ -48,11 +48,9 @@ class ChatViewModel @Inject constructor(
             socketClient.on("receive-chat") { receivedArray ->
                 val receivedMessage =
                     Gson().fromJson(receivedArray.last().toString(), Message::class.java)
+                _isSender.postValue(false)
                 _messageText.postValue(receivedMessage.msg)
                 _messageListState.value?.add(receivedMessage.msg)
-                _isSender.postValue(
-                    receivedMessage.user == pref.getString(Constants.USERNAME, "").toString()
-                )
                 Log.e("ReceiveChatEmitterListener", "$receivedMessage")
 
             }
@@ -70,6 +68,7 @@ class ChatViewModel @Inject constructor(
                 .put("room", pref.getString(Constants.ROOM_NUMBER, ""))
                 .put("msg", message)
                 .put("user", pref.getString(Constants.USERNAME, ""))
+            _isSender.postValue(true)
             _messageListState.value?.add(message)
             _messageText.value = ""
             socketClient.emit("send-chat", jsonData, Ack {
