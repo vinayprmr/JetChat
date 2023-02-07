@@ -7,6 +7,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.chatdemo.network.model.Message
+import com.example.chatdemo.network.model.MessageWithFlag
 import com.example.chatdemo.other.Constants
 import com.google.gson.Gson
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -26,40 +27,42 @@ class ChatViewModel @Inject constructor(
     private val socketClient: Socket,
     private val pref: SharedPreferences
 ) : ViewModel() {
-    private val _messageText = MutableLiveData("")
-    val messageText: LiveData<String> = _messageText
+    private val _sendMessageText = MutableLiveData("")
+    val sendMessageText: LiveData<String> = _sendMessageText
 
-    private var _isSender = MutableLiveData(true)
-    val isSender: LiveData<Boolean> = _isSender
-
-    private val _messageListState = MutableStateFlow<MutableList<String>?>(mutableListOf())
+    private val _messageListState = MutableStateFlow<MutableList<MessageWithFlag>?>(mutableListOf())
     val messageListState = _messageListState.asStateFlow()
 
-    fun onUserNameChange(newMessageText: String) {
-        _messageText.value = newMessageText
+    fun onSendMessageTextChange(newMessageText: String) {
+        _sendMessageText.value = newMessageText
     }
 
     init {
-
         if (!socketClient.connected()) {
             socketClient.connect()
         }
+    }
+
+    fun receivedMessage() =
         viewModelScope.launch(Dispatchers.Main) {
             socketClient.on("receive-chat") { receivedArray ->
                 val receivedMessage =
                     Gson().fromJson(receivedArray.last().toString(), Message::class.java)
-                _isSender.postValue(false)
-                _messageText.postValue(receivedMessage.msg)
-                _messageListState.value?.add(receivedMessage.msg)
+                _sendMessageText.postValue(receivedMessage.msg)
+                _messageListState.value?.add(
+                    MessageWithFlag(
+                        receivedMessage.msg,
+                        false
+                    )
+                )
                 Log.e("ReceiveChatEmitterListener", "$receivedMessage")
 
             }
         }
 
-    }
 
     fun sendMessage(message: String) {
-        if (messageText.value!!.isNotBlank()) {
+        if (sendMessageText.value!!.isNotBlank()) {
             val jsonData = JSONObject()
                 .put(
                     "time",
@@ -68,9 +71,13 @@ class ChatViewModel @Inject constructor(
                 .put("room", pref.getString(Constants.ROOM_NUMBER, ""))
                 .put("msg", message)
                 .put("user", pref.getString(Constants.USERNAME, ""))
-            _isSender.postValue(true)
-            _messageListState.value?.add(message)
-            _messageText.value = ""
+            _messageListState.value?.add(
+                MessageWithFlag(
+                    message,
+                    true
+                )
+            )
+            _sendMessageText.value = ""
             socketClient.emit("send-chat", jsonData, Ack {
                 Log.e("SendChatAck", Arrays.toString(it))
             })
