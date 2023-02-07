@@ -38,17 +38,15 @@ class ChatViewModel @Inject constructor(
     }
 
     init {
+
         if (!socketClient.connected()) {
             socketClient.connect()
         }
-    }
-
-    fun receivedMessage() =
         viewModelScope.launch(Dispatchers.Main) {
             socketClient.on("receive-chat") { receivedArray ->
                 val receivedMessage =
                     Gson().fromJson(receivedArray.last().toString(), Message::class.java)
-                _sendMessageText.postValue(receivedMessage.msg)
+//                _messageText.postValue(receivedMessage.msg)
                 _messageListState.value?.add(
                     MessageWithFlag(
                         receivedMessage.msg,
@@ -60,6 +58,7 @@ class ChatViewModel @Inject constructor(
             }
         }
 
+    }
 
     fun sendMessage(message: String) {
         if (sendMessageText.value!!.isNotBlank()) {
