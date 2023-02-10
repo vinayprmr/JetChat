@@ -30,7 +30,7 @@ class ChatViewModel @Inject constructor(
     private val _sendMessageText = MutableLiveData("")
     val sendMessageText: LiveData<String> = _sendMessageText
 
-    private val _messageListState = MutableStateFlow<MutableList<MessageWithFlag>?>(mutableListOf())
+    private val _messageListState = MutableStateFlow<List<MessageWithFlag>>(emptyList())
     val messageListState = _messageListState.asStateFlow()
 
     fun onSendMessageTextChange(newMessageText: String) {
@@ -38,7 +38,6 @@ class ChatViewModel @Inject constructor(
     }
 
     init {
-
         if (!socketClient.connected()) {
             socketClient.connect()
         }
@@ -46,19 +45,26 @@ class ChatViewModel @Inject constructor(
             socketClient.on("receive-chat") { receivedArray ->
                 val receivedMessage =
                     Gson().fromJson(receivedArray.last().toString(), Message::class.java)
-//                _messageText.postValue(receivedMessage.msg)
-                _messageListState.value?.add(
-                    MessageWithFlag(
-                        receivedMessage.msg,
-                        false
-                    )
-                )
+                addMessageToTheList(MessageWithFlag(
+                    receivedMessage.msg,
+                    false
+                ))
                 Log.e("ReceiveChatEmitterListener", "$receivedMessage")
+                Log.e("MessagesList", "${messageListState.value}")
 
             }
         }
-
     }
+
+    private fun addMessageToTheList(messageWithFlag: MessageWithFlag) {
+        viewModelScope.launch(Dispatchers.IO) {
+            _messageListState.value = buildList {
+                add(messageWithFlag)
+                messageListState.value.forEach { add(it) }
+            }
+        }
+    }
+
 
     fun sendMessage(message: String) {
         if (sendMessageText.value!!.isNotBlank()) {
@@ -70,12 +76,10 @@ class ChatViewModel @Inject constructor(
                 .put("room", pref.getString(Constants.ROOM_NUMBER, ""))
                 .put("msg", message)
                 .put("user", pref.getString(Constants.USERNAME, ""))
-            _messageListState.value?.add(
-                MessageWithFlag(
-                    message,
-                    true
-                )
-            )
+            addMessageToTheList(MessageWithFlag(
+                message,
+                true
+            ))
             _sendMessageText.value = ""
             socketClient.emit("send-chat", jsonData, Ack {
                 Log.e("SendChatAck", Arrays.toString(it))

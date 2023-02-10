@@ -60,7 +60,7 @@ private fun ChatScreenUi(
     onMessageTextChange: (String) -> Unit = {},
     navigateToHome: () -> Unit = {},
     sendMessage: () -> Unit = {},
-    messageList: MutableList<MessageWithFlag>? = mutableListOf()
+    messageList: List<MessageWithFlag>? = mutableListOf()
 ) {
     Box(
         modifier = Modifier
@@ -103,6 +103,7 @@ private fun ChatScreenUi(
                     .weight(1f)
                     .fillMaxSize(),
                 state = rememberLazyListState(),
+                reverseLayout = true
             ) {
                 items(messageList!!.toMutableList()) {
                     MessageBubble(message = it.message, isSender = it.isSender)
