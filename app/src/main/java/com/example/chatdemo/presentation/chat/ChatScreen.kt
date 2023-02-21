@@ -106,7 +106,7 @@ private fun ChatScreenUi(
                 reverseLayout = true
             ) {
                 items(messageList!!.toMutableList()) {
-                    MessageBubble(message = it.message, isSender = it.isSender)
+                    MessageBubble(message = it.message, isSender = it.isSender, userName = it.user)
                 }
             }
 
