@@ -61,9 +61,6 @@ fun MessageBubble(
                 MaterialTheme.colorScheme.onPrimaryContainer,
             fontWeight = FontWeight.Normal
         )
-        if (isSender) {
-            DisplayUsername(userName)
-        }
 
     }
 }
